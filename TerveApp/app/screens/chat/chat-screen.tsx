@@ -10,6 +10,7 @@ import { GiftedChat, IMessage } from "react-native-gifted-chat"
 import { color, spacing } from "../../theme"
 import { join } from "../../sockets/terve-socket"
 import { anonymousUserId } from "./user-id"
+import { useChannelRoom } from "../../sockets/terve-hook"
 
 const FULL: ViewStyle = { flex: 1 }
 const CONTAINER: ViewStyle = {
@@ -26,30 +27,14 @@ export const ChatScreen: FC<StackScreenProps<NavigatorParamList, "chat">> = obse
       setMessages((oldMessages) => [message, ...oldMessages])
     }
 
-    useEffect(() => {
-      const { send, leave } = join("lobby", {
-        onJoined(resp) {
-          console.tron.logImportant("room joined", resp)
-        },
-        onClosed() {
-          console.tron.logImportant("room closed")
-        },
-        onError(err) {
-          console.tron.logImportant("socket error", err)
-        },
-        onMessage(msg) {
-          console.tron.logImportant("socket message", msg)
-          addMessage(msg)
-        },
-      })
-
-      sendMessage.current = send
-
-      return () => {
-        // clearInterval(timer)
-        leave()
-      }
-    }, [])
+    /**
+     * Magic! Subscribe to the channel and add messages to the chat
+     * It also returns a `send` function to send new messages to the
+     * channel for broadcast.
+     */
+    const { send } = useChannelRoom("lobby", {
+      onMessage: addMessage,
+    })
 
     return (
       <View testID="ChatScreen" style={FULL}>
@@ -57,7 +42,7 @@ export const ChatScreen: FC<StackScreenProps<NavigatorParamList, "chat">> = obse
           <GiftedChat
             messages={messages}
             onSend={(messages) => {
-              sendMessage.current(messages[0])
+              send(messages[0])
             }}
             user={{
               _id: anonymousUserId,

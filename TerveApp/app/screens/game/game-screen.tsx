@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
-import { View, ViewStyle } from "react-native"
+import { GestureResponderEvent, View, ViewStyle } from "react-native"
 import { StackScreenProps } from "@react-navigation/stack"
 import { NavigatorParamList } from "../../navigators"
 import { Screen, Text } from "../../components"
@@ -11,6 +11,7 @@ import { anonymousUserId } from "../chat/user-id"
 import { join } from "../../sockets/terve-socket"
 import { CharacterType } from "./character-type"
 import { Character } from "./character"
+import { useChannelRoom } from "../../sockets/terve-hook"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -22,10 +23,10 @@ const GAME_CANVAS: ViewStyle = {
   backgroundColor: color.palette.deepPurple,
 }
 
-const throttle = (func, delay) => {
+function throttle<T>(func: T, delay: number) {
   let timeout = null
 
-  return function (...args) {
+  const newFunc = function (...args) {
     if (timeout === null) {
       func.apply(this, args)
 
@@ -33,7 +34,9 @@ const throttle = (func, delay) => {
         timeout = null
       }, delay)
     }
-  }
+  } as unknown as T
+
+  return newFunc
 }
 
 export const GameScreen: FC<StackScreenProps<NavigatorParamList, "game">> = observer(
@@ -49,7 +52,6 @@ export const GameScreen: FC<StackScreenProps<NavigatorParamList, "game">> = obse
         y: startY,
       },
     ])
-    const sendUpdate = React.useRef(undefined)
 
     function updateCharacter(character: CharacterType) {
       // console.tron.log("onMove", character.x, character.y)
@@ -66,30 +68,9 @@ export const GameScreen: FC<StackScreenProps<NavigatorParamList, "game">> = obse
       })
     }
 
-    useEffect(() => {
-      const { send, leave } = join("game", {
-        onJoined(resp) {
-          console.tron.logImportant("room joined", resp)
-        },
-        onClosed() {
-          console.tron.logImportant("room closed")
-        },
-        onError(err) {
-          console.tron.logImportant("socket error", err)
-        },
-        onMessage(msg) {
-          // console.tron.logImportant("socket message", msg)
-          updateCharacter(msg)
-        },
-      })
-
-      sendUpdate.current = send
-
-      return () => {
-        // clearInterval(timer)
-        leave()
-      }
-    }, [])
+    // Magic! This connects to the room and on new messages,
+    // runs the updateCharacter function
+    const { send } = useChannelRoom("game", { onMessage: updateCharacter })
 
     /**
      * Throttle the sending of messages to the server
@@ -98,17 +79,14 @@ export const GameScreen: FC<StackScreenProps<NavigatorParamList, "game">> = obse
      * finger.
      */
     const onMove = React.useCallback(
-      throttle((event) => {
+      throttle((event: GestureResponderEvent) => {
         const { nativeEvent } = event
         const { locationX, locationY } = nativeEvent
-
-        // android sometimes sends a 0,0 location, so ignore
-        if (locationX === 0 && locationY === 0) return
 
         const character = characters.find((c) => c.name === anonymousUserId)
         if (character) {
           // update the targetX and targetY
-          sendUpdate.current({
+          send({
             ...character,
             x: locationX,
             y: locationY,

@@ -1,5 +1,6 @@
 import { Socket } from "phoenix"
 import { Platform } from "react-native"
+import { TerveCallbacks } from "./terve-types"
 
 const userToken = "Something?"
 
@@ -16,15 +17,7 @@ let socketURL = socketURLs[Platform.OS] // TODO: put prod URL here
 const socket = new Socket(socketURL, { params: { token: userToken } })
 socket.connect()
 
-type Callbacks = {
-  onJoined?: (resp: any) => void
-  onClosed?: () => void
-  onMessage?: (resp: any) => void
-  onTimeout?: (resp: any) => void
-  onError?: (resp: any) => void
-}
-
-export function join(room: string, callbacks: Callbacks = {}) {
+export function join(room: string, callbacks: TerveCallbacks = {}) {
   // Now that you are connected, you can join channels with a topic:
   let channel = socket.channel(`room:${room}`, {})
 
