@@ -43,10 +43,6 @@ export const ChatScreen: FC<StackScreenProps<NavigatorParamList, "chat">> = obse
         },
       })
 
-      // timer = setInterval(() => {
-      //   send({ body: `Hey there from ${Platform.OS}!`, sent: Date.now() })
-      // }, 1000)
-
       sendMessage.current = send
 
       return () => {

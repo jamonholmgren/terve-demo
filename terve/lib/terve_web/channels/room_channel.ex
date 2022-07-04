@@ -5,6 +5,10 @@ defmodule TerveWeb.RoomChannel do
     {:ok, socket}
   end
 
+  def join("room:game", _message, socket) do
+    {:ok, socket}
+  end
+
   def join("room:" <> _private_room_id, _params, _socket) do
     {:error, %{reason: "unauthorized"}}
   end

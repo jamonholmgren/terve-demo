@@ -8,7 +8,7 @@ import React from "react"
 import { useColorScheme } from "react-native"
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { WelcomeScreen, DemoScreen, DemoListScreen, ChatScreen } from "../screens"
+import { WelcomeScreen, DemoScreen, DemoListScreen, ChatScreen, GameScreen } from "../screens"
 import { navigationRef, useBackButtonHandler } from "./navigation-utilities"
 
 /**
@@ -29,6 +29,7 @@ export type NavigatorParamList = {
   demoList: undefined
   // 🔥 Your screens go here
   chat: undefined
+  game: undefined
 }
 
 // Documentation: https://reactnavigation.org/docs/stack-navigator/
@@ -44,6 +45,7 @@ const AppStack = () => {
     >
       <Stack.Screen name="welcome" component={WelcomeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="chat" component={ChatScreen} />
+      <Stack.Screen name="game" component={GameScreen} />
       <Stack.Screen name="demo" component={DemoScreen} />
       <Stack.Screen name="demoList" component={DemoListScreen} />
       {/** 🔥 Your screens go here */}

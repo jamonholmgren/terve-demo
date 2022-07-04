@@ -145,7 +145,7 @@ export const WelcomeScreen: FC<StackScreenProps<NavigatorParamList, "welcome">> 
               testID="next-screen-button"
               style={CONTINUE}
               textStyle={CONTINUE_TEXT}
-              tx="welcomeScreen.continue"
+              text="Chat"
               onPress={nextScreen}
             />
           </View>
