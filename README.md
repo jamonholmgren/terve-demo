@@ -2,6 +2,8 @@
 
 This is an example app that uses Phoenix channels to broadcast chat messages and also allows for realtime game updates.
 
+It's using an experimental MobX-State-Tree extension called TerveSync.
+
 <table>
 <tr>
 <td>
@@ -24,6 +26,7 @@ TerveApp
   app
     sockets
       terve-socket.ts
+      terve-mst.ts
     screens
       chat
         chat-screen.tsx
@@ -72,6 +75,20 @@ send({ can: "really be anything" });
 ```
 
 It'll automatically leave that channel when the component unmounts.
+
+Or, if you prefer (as I do) to use MobX-State-Tree, the provided `withTerveSync` extension does _all_ of that automatically for you! All you have to do is hook up your store and anything you put in there will be synced across devices. (Note: very experimental -- lacks, for example, a good initial snapshot setup method.)
+
+```ts
+  .extend(
+    withTerveSync({
+      socketURL: `ws://${socketHost}:4000/socket`,
+      clientId: "my-users-id",
+      storeName: "RootStore",
+    }),
+  )
+```
+
+This will sync any actions you call on this store with any other clients with the same storeName.
 
 ## Elixir/Phoenix
 
