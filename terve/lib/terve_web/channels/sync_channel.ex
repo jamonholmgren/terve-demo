@@ -8,7 +8,7 @@ defmodule TerveWeb.SyncChannel do
 
     key = System.get_env("BASIC_SECRET_KEY") || raise("expected the BASIC_SECRET_KEY environment variable to be set")
 
-    if provided_key != key
+    if provided_key != key do
       {:error, %{reason: "unauthorized"}}
     else
       {:ok, socket}
