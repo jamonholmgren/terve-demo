@@ -1,5 +1,6 @@
 import { MutableRefObject, useEffect, useRef } from "react"
-import { join } from "./terve-socket"
+import { Platform } from "react-native"
+import { connect, join } from "./terve-socket"
 import { TerveCallbacks } from "./terve-types"
 
 type UseChannelHookReturn = { send: (msg: any) => void }
@@ -11,7 +12,10 @@ export function useChannelRoom(roomName: string, callbacks: TerveCallbacks): Use
   const sendUpdate = useRef(undefined)
 
   useEffect(() => {
+    connect(Platform.OS === "ios" ? "ws://localhost:4000/socket" : "ws://10.0.2.2:4000/socket")
+
     const { send, leave } = join(roomName, callbacks)
+
     sendUpdate.current = send
     return () => {
       // clearInterval(timer)

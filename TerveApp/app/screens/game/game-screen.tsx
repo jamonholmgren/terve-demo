@@ -8,10 +8,8 @@ import { Screen, Text } from "../../components"
 // import { useStores } from "../../models"
 import { color } from "../../theme"
 import { anonymousUserId } from "../chat/user-id"
-import { join } from "../../sockets/terve-socket"
-import { CharacterType } from "./character-type"
 import { Character } from "./character"
-import { useChannelRoom } from "../../sockets/terve-hook"
+import { useStores } from "../../models"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -41,36 +39,19 @@ function throttle<T>(func: T, delay: number) {
 
 export const GameScreen: FC<StackScreenProps<NavigatorParamList, "game">> = observer(
   function GameScreen() {
-    const startX = Math.floor(Math.random() * 300) + 50
-    const startY = Math.floor(Math.random() * 300) + 50
+    const rootStore = useStores()
 
-    const [characters, setCharacters] = React.useState<CharacterType[]>([
-      {
-        name: anonymousUserId,
-        // randomize position
-        x: startX,
-        y: startY,
-      },
-    ])
-
-    function updateCharacter(character: CharacterType) {
-      // console.tron.log("onMove", character.x, character.y)
-
-      setCharacters((oldCharacters) => {
-        const newCharacters = [...oldCharacters]
-        const index = newCharacters.findIndex((c) => c.name === character.name)
-        if (index >= 0) {
-          newCharacters[index] = character
-        } else {
-          newCharacters.push(character)
-        }
-        return newCharacters
-      })
-    }
-
-    // Magic! This connects to the room and on new messages,
-    // runs the updateCharacter function
-    const { send } = useChannelRoom("game", { onMessage: updateCharacter })
+    useEffect(() => {
+      // add my game character if it doesn't exist
+      console.tron.logImportant("useEffect")
+      if (!rootStore.gameCharacters.find((c) => c.name === anonymousUserId)) {
+        rootStore.addGameCharacter({
+          name: anonymousUserId,
+          x: Math.floor(Math.random() * 300) + 50,
+          y: Math.floor(Math.random() * 300) + 50,
+        })
+      }
+    }, [])
 
     /**
      * Throttle the sending of messages to the server
@@ -82,15 +63,11 @@ export const GameScreen: FC<StackScreenProps<NavigatorParamList, "game">> = obse
       throttle((event: GestureResponderEvent) => {
         const { nativeEvent } = event
         const { locationX, locationY } = nativeEvent
+        const myCharacter = rootStore.gameCharacters.find((c) => c.name === anonymousUserId)
 
-        const character = characters.find((c) => c.name === anonymousUserId)
-        if (character) {
-          // update the targetX and targetY
-          send({
-            ...character,
-            x: locationX,
-            y: locationY,
-          })
+        if (myCharacter) {
+          // update the targetX and targetY on the character
+          myCharacter.move(locationX, locationY)
         }
       }, 16),
       [throttle],
@@ -106,14 +83,10 @@ export const GameScreen: FC<StackScreenProps<NavigatorParamList, "game">> = obse
         <View
           ref={canvasRef}
           style={GAME_CANVAS}
-          // onStartShouldSetResponder={(event) => true}
-          onMoveShouldSetResponder={(event) => {
-            // check if it's the parent component or a child
-            return true
-          }}
+          onMoveShouldSetResponder={(event) => true}
           onResponderMove={onMove}
         >
-          {characters.map((character) => (
+          {rootStore.gameCharacters.map((character) => (
             <Character character={character} key={character.name} />
           ))}
         </View>

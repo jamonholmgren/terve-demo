@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from "react"
-import { CharacterType } from "./character-type"
 import { Text } from "../../components"
 import { color } from "../../theme"
 import { Animated } from "react-native"
 import { anonymousUserId, randomUsername } from "../chat/user-id"
+import { GameCharacter } from "../../models"
+import { observer } from "mobx-react-lite"
 
-export function Character({ character }: { character: CharacterType }) {
+export const Character = observer(function Character({ character }: { character: GameCharacter }) {
   const xAnim = useRef(new Animated.Value(character.x)).current
   const yAnim = useRef(new Animated.Value(character.y)).current
 
@@ -57,4 +58,4 @@ export function Character({ character }: { character: CharacterType }) {
       />
     </Animated.View>
   )
-}
+})

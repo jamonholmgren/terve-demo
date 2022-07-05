@@ -8,9 +8,8 @@ import { Screen, Text } from "../../components"
 // import { useStores } from "../../models"
 import { GiftedChat, IMessage } from "react-native-gifted-chat"
 import { color, spacing } from "../../theme"
-import { join } from "../../sockets/terve-socket"
 import { anonymousUserId } from "./user-id"
-import { useChannelRoom } from "../../sockets/terve-hook"
+import { useStores } from "../../models"
 
 const FULL: ViewStyle = { flex: 1 }
 const CONTAINER: ViewStyle = {
@@ -20,29 +19,15 @@ const CONTAINER: ViewStyle = {
 
 export const ChatScreen: FC<StackScreenProps<NavigatorParamList, "chat">> = observer(
   function ChatScreen() {
-    const [messages, setMessages] = React.useState<IMessage[]>([])
-    const sendMessage = React.useRef(undefined)
-
-    function addMessage(message: IMessage) {
-      setMessages((oldMessages) => [message, ...oldMessages])
-    }
-
-    /**
-     * Magic! Subscribe to the channel and add messages to the chat
-     * It also returns a `send` function to send new messages to the
-     * channel for broadcast.
-     */
-    const { send } = useChannelRoom("lobby", {
-      onMessage: addMessage,
-    })
+    const rootStore = useStores()
 
     return (
       <View testID="ChatScreen" style={FULL}>
         <Screen style={CONTAINER} preset="fixed" backgroundColor={color.transparent}>
           <GiftedChat
-            messages={messages}
+            messages={rootStore.messages.slice()}
             onSend={(messages) => {
-              send(messages[0])
+              rootStore.addMessage(messages[0])
             }}
             user={{
               _id: anonymousUserId,

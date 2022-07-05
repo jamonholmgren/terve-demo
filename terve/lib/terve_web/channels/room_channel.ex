@@ -9,6 +9,11 @@ defmodule TerveWeb.RoomChannel do
     {:ok, socket}
   end
 
+  # syncing MST states
+  def join("room:sync:" <> store_name, _message, socket) do
+    {:ok, socket}
+  end
+
   def join("room:" <> _private_room_id, _params, _socket) do
     {:error, %{reason: "unauthorized"}}
   end

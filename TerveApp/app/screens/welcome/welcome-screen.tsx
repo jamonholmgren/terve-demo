@@ -14,6 +14,7 @@ import { color, spacing, typography } from "../../theme"
 import { NavigatorParamList } from "../../navigators"
 
 import { join } from "../../sockets/terve-socket"
+import { anonymousUserId } from "../chat/user-id"
 
 const bowserLogo = require("./bowser.png")
 
@@ -136,7 +137,7 @@ export const WelcomeScreen: FC<StackScreenProps<NavigatorParamList, "welcome">> 
               testID="next-screen-button"
               style={CONTINUE}
               textStyle={CONTINUE_TEXT}
-              text="Play Game"
+              text={`Play Game as ${anonymousUserId}`}
               onPress={playGame}
             />
           </View>

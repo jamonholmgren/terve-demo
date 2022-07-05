@@ -1,12 +1,7 @@
-import { onSnapshot } from "mobx-state-tree"
+import { onPatch, onSnapshot } from "mobx-state-tree"
 import { RootStoreModel, RootStore } from "./root-store"
 import { Environment } from "../environment"
-import * as storage from "../../utils/storage"
-
-/**
- * The key we'll be saving our state as within async storage.
- */
-const ROOT_STATE_STORAGE_KEY = "root"
+import { $nonEmptyObject } from "mobx-state-tree/dist/internal"
 
 /**
  * Setup the environment that all the models will be sharing.
@@ -30,18 +25,14 @@ export async function setupRootStore() {
 
   // prepare the environment that will be associated with the RootStore.
   const env = await createEnvironment()
-  try {
-    // load data from storage
-    data = (await storage.load(ROOT_STATE_STORAGE_KEY)) || {}
-    rootStore = RootStoreModel.create(data, env)
-  } catch (e) {
-    // if there's any problems loading, then let's at least fallback to an empty state
-    // instead of crashing.
-    rootStore = RootStoreModel.create({}, env)
 
-    // but please inform us what happened
-    __DEV__ && console.tron.error(e.message, null)
-  }
+  rootStore = RootStoreModel.create(
+    {
+      messages: [],
+      gameCharacters: [],
+    },
+    env,
+  )
 
   // reactotron logging
   if (__DEV__) {
@@ -49,7 +40,7 @@ export async function setupRootStore() {
   }
 
   // track changes & save to storage
-  onSnapshot(rootStore, (snapshot) => storage.save(ROOT_STATE_STORAGE_KEY, snapshot))
+  // onSnapshot(rootStore, (snapshot) => storage.save(ROOT_STATE_STORAGE_KEY, snapshot))
 
   return rootStore
 }
