@@ -10,7 +10,11 @@ defmodule TerveWeb.RoomChannel do
   end
 
   # syncing MST states
-  def join("room:sync:" <> store_name, _message, socket) do
+  def join("room:sync:" <> _store_name, _message, socket) do
+    key = System.get_env("BASIC_SECRET_KEY") || raise("expected the BASIC_SECRET_KEY environment variable to be set")
+
+    IO.puts(socket)
+
     {:ok, socket}
   end
 

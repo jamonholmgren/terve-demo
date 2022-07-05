@@ -11,6 +11,7 @@ defmodule TerveWeb.UserSocket do
   # pointing to the `TerveWeb.RoomChannel`:
   #
   channel "room:*", TerveWeb.RoomChannel
+  channel "tervesync:*", TerveWeb.SyncChannel
   #
   # To create a channel file, use the mix task:
   #

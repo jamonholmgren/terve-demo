@@ -1,7 +1,5 @@
-import { onPatch, onSnapshot } from "mobx-state-tree"
 import { RootStoreModel, RootStore } from "./root-store"
 import { Environment } from "../environment"
-import { $nonEmptyObject } from "mobx-state-tree/dist/internal"
 
 /**
  * Setup the environment that all the models will be sharing.
