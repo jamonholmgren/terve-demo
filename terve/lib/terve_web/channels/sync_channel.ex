@@ -3,12 +3,12 @@ defmodule TerveWeb.SyncChannel do
 
   # syncing MST states
   def join("tervesync:" <> key_and_storename, _message, socket) do
-    provided_key = key_and_storename.split(":").first
-    storename = key_and_storename.split(":").rest.join(":")
+    [key, _storename] = key_and_storename
+      |> String.split(":", parts: 2)
 
-    key = System.get_env("BASIC_SECRET_KEY") || raise("expected the BASIC_SECRET_KEY environment variable to be set")
+    secret_key = System.get_env("BASIC_SECRET_KEY") || raise("expected the BASIC_SECRET_KEY environment variable to be set")
 
-    if provided_key != key do
+    if secret_key != key do
       {:error, %{reason: "unauthorized"}}
     else
       {:ok, socket}
